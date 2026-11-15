@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">SUJOY PAY</string>
+    <string name="tagline">Smart, Secure Indian Digital Payments</string>
+    <string name="sandbox_badge">SANDBOX GATEWAY MODE</string>
+    <string name="nav_home">Home</string>
+    <string name="nav_history">History</string>
+    <string name="nav_scan">Scan &amp; Pay</string>
+    <string name="nav_admin">Admin</string>
+    <string name="nav_profile">Profile</string>
+</resources>

@@ -1,0 +1,6 @@
+{
+  "name": "SUJOY PAY",
+  "description": "SUJOY PAY — Modern Indian digital payment, UPI wallet, bill pay, and fintech admin management Android app.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
