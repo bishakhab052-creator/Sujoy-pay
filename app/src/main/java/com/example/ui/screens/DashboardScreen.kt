@@ -26,6 +26,7 @@ import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.AccountBalance
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.CardGiftcard
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.QrCode
@@ -303,6 +304,59 @@ fun DashboardScreen(
                                 Text("Withdraw", fontWeight = FontWeight.SemiBold)
                             }
                         }
+                    }
+                }
+            }
+        }
+
+        // 3b. 25% Instant Cashback Reward Banner
+        item {
+            Surface(
+                color = sujoy.successContainer,
+                shape = RoundedCornerShape(16.dp),
+                border = androidx.compose.foundation.BorderStroke(1.dp, sujoy.success.copy(alpha = 0.4f)),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("dashboard_cashback_banner")
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 14.dp, vertical = 12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
+                        Icon(
+                            imageVector = Icons.Default.CardGiftcard,
+                            contentDescription = "25% Cashback",
+                            tint = sujoy.success,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Column {
+                            Text(
+                                text = "25% Instant Cashback Active",
+                                style = MaterialTheme.typography.titleSmall,
+                                color = sujoy.success,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = "Earned on every UPI transfer & bill payment",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Column(horizontalAlignment = Alignment.End) {
+                        Text("EARNED", style = MaterialTheme.typography.labelSmall, color = sujoy.success)
+                        Text(
+                            text = Formatters.formatInrCompact(user?.totalCashbackEarnedPaise ?: 0L),
+                            style = MaterialTheme.typography.titleMedium,
+                            color = sujoy.success,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
                 }
             }

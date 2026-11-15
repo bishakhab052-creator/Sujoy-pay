@@ -183,11 +183,16 @@ class WalletViewModel(
             _uiState.update { it.copy(isBusy = true, errorMessage = null) }
             when (val res = repository.sendMoney(currentUserId, recipientHandle, recipientName, paise, note, mpin)) {
                 is RepoResult.Success -> {
+                    val activeSettings = settings.value
+                    val cbPaise = if (activeSettings?.cashbackEnabled == true && (activeSettings.cashbackPercent) > 0) {
+                        (paise * activeSettings.cashbackPercent) / 100L
+                    } else 0L
+                    val cbNote = if (cbPaise > 0L) " + ${Formatters.formatInr(cbPaise)} (${activeSettings?.cashbackPercent}% Cashback)!" else "!"
                     _uiState.update {
                         it.copy(
                             isBusy = false,
                             latestCompletedTxn = res.data,
-                            successMessage = "Sent ${Formatters.formatInr(paise)} successfully!"
+                            successMessage = "Sent ${Formatters.formatInr(paise)} successfully$cbNote"
                         )
                     }
                     clearScannedUpiTarget()
@@ -262,11 +267,16 @@ class WalletViewModel(
                 )
             ) {
                 is RepoResult.Success -> {
+                    val activeSettings = settings.value
+                    val cbPaise = if (activeSettings?.cashbackEnabled == true && activeSettings.cashbackPercent > 0) {
+                        (paise * activeSettings.cashbackPercent) / 100L
+                    } else 0L
+                    val cbNote = if (cbPaise > 0L) " + ${Formatters.formatInr(cbPaise)} (${activeSettings?.cashbackPercent}% Cashback)!" else "!"
                     _uiState.update {
                         it.copy(
                             isBusy = false,
                             latestCompletedTxn = res.data,
-                            successMessage = "$providerName payment of ${Formatters.formatInr(paise)} successful!"
+                            successMessage = "$providerName payment of ${Formatters.formatInr(paise)} successful$cbNote"
                         )
                     }
                 }

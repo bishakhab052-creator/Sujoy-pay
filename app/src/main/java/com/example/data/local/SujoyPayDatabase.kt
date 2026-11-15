@@ -18,7 +18,7 @@ import kotlinx.coroutines.sync.withLock
         PaymentSettingsEntity::class,
         AuditLogEntity::class
     ],
-    version = 1,
+    version = 3,
     exportSchema = false
 )
 abstract class SujoyPayDatabase : RoomDatabase() {
@@ -35,7 +35,7 @@ abstract class SujoyPayDatabase : RoomDatabase() {
                     context.applicationContext,
                     SujoyPayDatabase::class.java,
                     "sujoy_pay_encrypted_db"
-                ).build().also { INSTANCE = it }
+                ).fallbackToDestructiveMigration(dropAllTables = true).build().also { INSTANCE = it }
             }
         }
 
@@ -59,6 +59,8 @@ abstract class SujoyPayDatabase : RoomDatabase() {
                         dailyLimitPaise = 10_000_000L,
                         walletMaxBalancePaise = 20_000_000L,
                         convenienceFeeBps = 0,
+                        cashbackEnabled = true,
+                        cashbackPercent = 25,
                         updatedAt = now,
                         updatedBy = "SYSTEM_INIT"
                     )
@@ -80,6 +82,7 @@ abstract class SujoyPayDatabase : RoomDatabase() {
                         isFrozen = false,
                         balancePaise = 24850_50L, // ₹24,850.50
                         dailySpentPaise = 1899_00L,
+                        totalCashbackEarnedPaise = 474_75L, // 25% of seeded ₹1,899 payments
                         mpinHash = CryptoVault.hashPin("1234", primaryUserId),
                         encryptedBankInfo = CryptoVault.encryptSensitive("HDFC Bank •••• 4821 | HDFC0001024"),
                         createdAt = now - 30 * 24 * hour
@@ -98,7 +101,7 @@ abstract class SujoyPayDatabase : RoomDatabase() {
                         isFrozen = false,
                         balancePaise = 50000_00L,
                         dailySpentPaise = 0L,
-                        mpinHash = CryptoVault.hashPin("1234", adminUserId),
+                        mpinHash = CryptoVault.hashPin("8016", adminUserId),
                         encryptedBankInfo = CryptoVault.encryptSensitive("ICICI Bank •••• 9910 | ICIC0000011"),
                         createdAt = now - 60 * 24 * hour
                     )

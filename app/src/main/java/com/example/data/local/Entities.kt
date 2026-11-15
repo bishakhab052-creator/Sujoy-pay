@@ -15,6 +15,7 @@ data class UserEntity(
     val isFrozen: Boolean = false,
     val balancePaise: Long = 0L,
     val dailySpentPaise: Long = 0L,
+    val totalCashbackEarnedPaise: Long = 0L,
     val mpinHash: String,
     val encryptedBankInfo: String = "",
     val createdAt: Long = System.currentTimeMillis()
@@ -86,6 +87,8 @@ data class PaymentSettingsEntity(
     val dailyLimitPaise: Long = 10_000_000L,
     val walletMaxBalancePaise: Long = 20_000_000L, // ₹2,00,000 RBI Full KYC limit
     val convenienceFeeBps: Int = 0, // 0% for UPI
+    val cashbackEnabled: Boolean = true,
+    val cashbackPercent: Int = 25,
     val updatedAt: Long = System.currentTimeMillis(),
     val updatedBy: String = "SYSTEM"
 )

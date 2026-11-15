@@ -376,7 +376,7 @@ fun AuthScreen(
                                 )
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Text(
-                                    "Quick Sandbox Access (MPIN: 1234)",
+                                    "Quick Sandbox Access (Demo MPIN: 1234)",
                                     style = MaterialTheme.typography.labelLarge
                                 )
                             }

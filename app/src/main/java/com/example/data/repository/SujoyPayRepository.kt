@@ -535,6 +535,30 @@ class SujoyPayRepository(
             )
         }
 
+        val cashbackPaise = if (settings.cashbackEnabled && settings.cashbackPercent > 0) {
+            (amountPaise * settings.cashbackPercent) / 100L
+        } else 0L
+
+        val cashbackTxn = if (cashbackPaise > 0L) {
+            TransactionEntity(
+                id = "txn_cb_${UUID.randomUUID().toString().replace("-", "").take(10)}",
+                userId = senderId,
+                utrNumber = "CB$utr",
+                orderId = orderId,
+                type = "CASHBACK",
+                direction = "CREDIT",
+                status = "SUCCESS",
+                amountPaise = cashbackPaise,
+                counterpartyName = "${settings.cashbackPercent}% Instant Cashback",
+                counterpartyHandle = "Reward • $displayCounterparty",
+                gatewayMethod = "SUJOY_WALLET",
+                gatewaySignature = sig,
+                riskScore = 0,
+                isFlagged = false,
+                note = "${settings.cashbackPercent}% cashback on ${Formatters.formatInr(amountPaise)} payment"
+            )
+        } else null
+
         dao.executeAtomicDebitAndOptionalCredit(
             senderId = senderId,
             debitPaise = amountPaise,
@@ -542,13 +566,15 @@ class SujoyPayRepository(
             creditPaise = amountPaise,
             senderTxn = senderTxn,
             recipientTxn = recipientTxn,
+            cashbackPaise = cashbackPaise,
+            cashbackTxn = cashbackTxn,
             auditLog = AuditLogEntity(
                 id = "aud_${UUID.randomUUID().toString().take(10)}",
                 actorUserId = senderId,
                 actorRole = sender.role,
                 action = if (fraud.isFlagged) "HIGH_RISK_TRANSFER" else "UPI_SEND_SUCCESS",
                 targetId = senderTxn.id,
-                details = "Sent ${Formatters.formatInr(amountPaise)} to $normalizedHandle (Risk: ${fraud.riskScore}).",
+                details = "Sent ${Formatters.formatInr(amountPaise)} to $normalizedHandle (Cashback: ${Formatters.formatInr(cashbackPaise)}, Risk: ${fraud.riskScore}).",
                 severity = if (fraud.isFlagged) "WARN" else "INFO"
             )
         )
@@ -695,6 +721,30 @@ class SujoyPayRepository(
             note = planOrNote.ifBlank { providerName }
         )
 
+        val cashbackPaise = if (settings.cashbackEnabled && settings.cashbackPercent > 0) {
+            (amountPaise * settings.cashbackPercent) / 100L
+        } else 0L
+
+        val cashbackTxn = if (cashbackPaise > 0L) {
+            TransactionEntity(
+                id = "txn_cb_${UUID.randomUUID().toString().replace("-", "").take(10)}",
+                userId = userId,
+                utrNumber = "CB$utr",
+                orderId = orderId,
+                type = "CASHBACK",
+                direction = "CREDIT",
+                status = "SUCCESS",
+                amountPaise = cashbackPaise,
+                counterpartyName = "${settings.cashbackPercent}% Instant Cashback",
+                counterpartyHandle = "Reward • $providerName",
+                gatewayMethod = "SUJOY_WALLET",
+                gatewaySignature = sig,
+                riskScore = 0,
+                isFlagged = false,
+                note = "${settings.cashbackPercent}% cashback on $providerName bill/recharge"
+            )
+        } else null
+
         dao.executeAtomicDebitAndOptionalCredit(
             senderId = userId,
             debitPaise = amountPaise,
@@ -702,13 +752,15 @@ class SujoyPayRepository(
             creditPaise = 0L,
             senderTxn = txn,
             recipientTxn = null,
+            cashbackPaise = cashbackPaise,
+            cashbackTxn = cashbackTxn,
             auditLog = AuditLogEntity(
                 id = "aud_${UUID.randomUUID().toString().take(10)}",
                 actorUserId = userId,
                 actorRole = user.role,
                 action = "BBPS_PAYMENT_$type",
                 targetId = txn.id,
-                details = "Paid ${Formatters.formatInr(amountPaise)} for $providerName ($consumerOrMobileId).",
+                details = "Paid ${Formatters.formatInr(amountPaise)} for $providerName ($consumerOrMobileId); Cashback: ${Formatters.formatInr(cashbackPaise)}.",
                 severity = "INFO"
             )
         )

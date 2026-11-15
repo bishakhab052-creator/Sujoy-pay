@@ -36,6 +36,9 @@ interface SujoyPayDao {
     @Query("UPDATE users SET dailySpentPaise = dailySpentPaise + :amountPaise WHERE id = :userId")
     suspend fun incrementDailySpent(userId: String, amountPaise: Long)
 
+    @Query("UPDATE users SET totalCashbackEarnedPaise = totalCashbackEarnedPaise + :cashbackPaise WHERE id = :userId")
+    suspend fun incrementCashbackEarned(userId: String, cashbackPaise: Long)
+
     @Query("UPDATE users SET isFrozen = :frozen WHERE id = :userId")
     suspend fun setUserFrozen(userId: String, frozen: Boolean)
 
@@ -147,11 +150,18 @@ interface SujoyPayDao {
         creditPaise: Long,
         senderTxn: TransactionEntity,
         recipientTxn: TransactionEntity?,
-        auditLog: AuditLogEntity
+        auditLog: AuditLogEntity,
+        cashbackPaise: Long = 0L,
+        cashbackTxn: TransactionEntity? = null
     ) {
         adjustUserBalance(senderId, -debitPaise)
         incrementDailySpent(senderId, debitPaise)
         upsertTransaction(senderTxn)
+        if (cashbackPaise > 0L && cashbackTxn != null) {
+            adjustUserBalance(senderId, cashbackPaise)
+            incrementCashbackEarned(senderId, cashbackPaise)
+            upsertTransaction(cashbackTxn)
+        }
         if (recipientId != null && recipientTxn != null && creditPaise > 0L) {
             adjustUserBalance(recipientId, creditPaise)
             upsertTransaction(recipientTxn)

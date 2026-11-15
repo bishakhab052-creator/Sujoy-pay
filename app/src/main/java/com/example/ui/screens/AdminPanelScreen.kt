@@ -118,7 +118,7 @@ fun AdminPanelScreen(
                     )
                     Text(
                         if (currentUser?.role == "ADMIN") {
-                            "Enter Admin Security PIN to unlock compliance, fraud monitoring & refund controls. (Sandbox PIN: 1234)"
+                            "Enter Admin Password to unlock compliance, fraud monitoring & refund controls."
                         } else {
                             "Restricted to ADMIN accounts. Log out and sign in via 'Admin' on the Auth screen to inspect full governance tools."
                         },
@@ -131,7 +131,7 @@ fun AdminPanelScreen(
             OutlinedTextField(
                 value = adminPinInput,
                 onValueChange = { if (it.length <= 4 && it.all(Char::isDigit)) adminPinInput = it },
-                label = { Text("4-Digit Admin PIN") },
+                label = { Text("Admin Password (4-Digit)") },
                 leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
@@ -223,6 +223,7 @@ fun AdminPanelScreen(
             when (selectedSection) {
                 "REPORTS" -> {
                     val totalFloat = users.sumOf { it.balancePaise }
+                    val totalCashback = users.sumOf { it.totalCashbackEarnedPaise }
                     val successTxns = transactions.filter { it.status == "SUCCESS" }
                     val totalVol = successTxns.sumOf { it.amountPaise }
                     val successRate = if (transactions.isEmpty()) 100 else (successTxns.size * 100) / transactions.size
@@ -236,7 +237,7 @@ fun AdminPanelScreen(
                     item {
                         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                             AdminStatCard("Success Rate", "$successRate%", Modifier.weight(1f))
-                            AdminStatCard("Flagged Alerts", "${flaggedTransactions.size}", Modifier.weight(1f))
+                            AdminStatCard("25% Cashback Paid", Formatters.formatInrCompact(totalCashback), Modifier.weight(1f))
                         }
                     }
                     item {
@@ -442,6 +443,9 @@ fun AdminPanelScreen(
                         ) {
                             Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                 Text("Gateway & Compliance Controls", style = MaterialTheme.typography.titleMedium)
+                                SettingsToggleRow("${current.cashbackPercent}% Instant Cashback", current.cashbackEnabled) {
+                                    onUpdateSettings(current.copy(cashbackEnabled = it))
+                                }
                                 SettingsToggleRow("Sandbox Gateway Mode", current.sandboxModeEnabled) {
                                     onUpdateSettings(current.copy(sandboxModeEnabled = it))
                                 }

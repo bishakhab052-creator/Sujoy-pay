@@ -22,6 +22,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.AccountBalance
 import androidx.compose.material.icons.filled.AlternateEmail
+import androidx.compose.material.icons.filled.CardGiftcard
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -49,6 +50,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.example.data.local.PaymentSettingsEntity
 import com.example.data.local.UserEntity
 import com.example.ui.components.MpinConfirmationDialog
 import com.example.ui.theme.LocalSujoyColors
@@ -67,7 +69,8 @@ fun SendAndWithdrawScreen(
     onBack: () -> Unit,
     onOpenScanner: () -> Unit,
     onSendMoney: (handle: String, name: String, amount: String, note: String, mpin: String) -> Unit,
-    onWithdrawMoney: (account: String, ifsc: String, holder: String, amount: String, mpin: String) -> Unit
+    onWithdrawMoney: (account: String, ifsc: String, holder: String, amount: String, mpin: String) -> Unit,
+    settings: PaymentSettingsEntity? = null
 ) {
     val sujoy = LocalSujoyColors.current
     var isWithdrawTab by remember { mutableStateOf(initialTabIsWithdraw) }
@@ -231,6 +234,46 @@ fun SendAndWithdrawScreen(
                                 singleLine = true,
                                 modifier = Modifier.fillMaxWidth()
                             )
+                        }
+                    }
+                }
+
+                val cashbackEnabled = settings?.cashbackEnabled ?: true
+                val cashbackPercent = settings?.cashbackPercent ?: 25
+                if (cashbackEnabled && cashbackPercent > 0) {
+                    item {
+                        val sendPaise = Formatters.parseRupeesToPaise(sendAmount) ?: 0L
+                        val previewCashback = if (sendPaise >= 100L) (sendPaise * cashbackPercent) / 100L else 0L
+                        Surface(
+                            color = sujoy.successContainer,
+                            shape = RoundedCornerShape(14.dp),
+                            border = BorderStroke(1.dp, sujoy.success.copy(alpha = 0.35f)),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .testTag("send_cashback_preview")
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.CardGiftcard,
+                                    contentDescription = "Instant Cashback",
+                                    tint = sujoy.success,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                Spacer(modifier = Modifier.width(10.dp))
+                                Text(
+                                    text = if (previewCashback > 0L) {
+                                        "Instant $cashbackPercent% Cashback: +${Formatters.formatInr(previewCashback)} credited on payment"
+                                    } else {
+                                        "Earn $cashbackPercent% instant cashback on every UPI transfer"
+                                    },
+                                    style = MaterialTheme.typography.bodySmall,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = sujoy.success
+                                )
+                            }
                         }
                     }
                 }

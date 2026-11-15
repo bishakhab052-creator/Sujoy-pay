@@ -392,7 +392,8 @@ private fun AuthenticatedAppShell(
                                 onSendMoney = { handle, name, amount, note, mpin ->
                                     walletViewModel.sendMoney(handle, name, amount, note, mpin)
                                 },
-                                onWithdrawMoney = walletViewModel::withdrawMoney
+                                onWithdrawMoney = walletViewModel::withdrawMoney,
+                                settings = settings
                             )
                         }
 
@@ -413,7 +414,8 @@ private fun AuthenticatedAppShell(
                                 user = user,
                                 uiState = walletUiState,
                                 onBack = { navController.popBackStack() },
-                                onPayBill = walletViewModel::payBillOrRecharge
+                                onPayBill = walletViewModel::payBillOrRecharge,
+                                settings = settings
                             )
                         }
                     }

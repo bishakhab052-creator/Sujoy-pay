@@ -74,8 +74,7 @@ class AdminViewModel(
             _uiState.update { it.copy(pinError = "User session unavailable.") }
             return
         }
-        val pinMatches = CryptoVault.verifyPin(enteredPin.trim(), user.id, user.mpinHash) ||
-            (user.role == "ADMIN" && enteredPin.trim() == "1234")
+        val pinMatches = CryptoVault.verifyPin(enteredPin.trim(), user.id, user.mpinHash)
         if (user.role == "ADMIN" && pinMatches) {
             _uiState.update { it.copy(isUnlocked = true, pinError = null) }
         } else if (user.role != "ADMIN") {
@@ -83,7 +82,7 @@ class AdminViewModel(
                 it.copy(pinError = "Access Denied: Admin Role required. Switch to Admin Account in Auth/Profile.")
             }
         } else {
-            _uiState.update { it.copy(pinError = "Invalid Admin Security PIN.") }
+            _uiState.update { it.copy(pinError = "Invalid Admin Password.") }
         }
     }
 

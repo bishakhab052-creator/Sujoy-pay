@@ -23,6 +23,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.CardGiftcard
 import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Tv
@@ -53,6 +54,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.example.data.local.PaymentSettingsEntity
 import com.example.data.local.UserEntity
 import com.example.ui.components.MpinConfirmationDialog
 import com.example.ui.theme.LocalSujoyColors
@@ -107,7 +109,8 @@ fun RechargeAndBillsScreen(
     user: UserEntity?,
     uiState: WalletUiState,
     onBack: () -> Unit,
-    onPayBill: (type: String, provider: String, consumerId: String, amount: String, note: String, mpin: String) -> Unit
+    onPayBill: (type: String, provider: String, consumerId: String, amount: String, note: String, mpin: String) -> Unit,
+    settings: PaymentSettingsEntity? = null
 ) {
     val sujoy = LocalSujoyColors.current
     var selectedCategory by remember {
@@ -289,6 +292,46 @@ fun RechargeAndBillsScreen(
                                 .fillMaxWidth()
                                 .testTag("bill_amount_input")
                         )
+                    }
+                }
+            }
+
+            val cashbackEnabled = settings?.cashbackEnabled ?: true
+            val cashbackPercent = settings?.cashbackPercent ?: 25
+            if (cashbackEnabled && cashbackPercent > 0) {
+                item {
+                    val billPaise = Formatters.parseRupeesToPaise(amountText) ?: 0L
+                    val previewCashback = if (billPaise >= 10_00L) (billPaise * cashbackPercent) / 100L else 0L
+                    Surface(
+                        color = sujoy.successContainer,
+                        shape = RoundedCornerShape(14.dp),
+                        border = BorderStroke(1.dp, sujoy.success.copy(alpha = 0.35f)),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag("bill_cashback_preview")
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.CardGiftcard,
+                                contentDescription = "Instant Cashback",
+                                tint = sujoy.success,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Text(
+                                text = if (previewCashback > 0L) {
+                                    "Instant $cashbackPercent% Cashback: +${Formatters.formatInr(previewCashback)} credited after payment"
+                                } else {
+                                    "Get $cashbackPercent% instant cashback on every recharge & BBPS bill"
+                                },
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.SemiBold,
+                                color = sujoy.success
+                            )
+                        }
                     }
                 }
             }

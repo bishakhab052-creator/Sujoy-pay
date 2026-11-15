@@ -23,6 +23,7 @@ import androidx.compose.material.icons.automirrored.filled.CallReceived
 import androidx.compose.material.icons.filled.AccountBalance
 import androidx.compose.material.icons.filled.AddCard
 import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.CardGiftcard
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Error
@@ -185,6 +186,7 @@ fun iconForTransactionType(type: String): ImageVector = when (type) {
     "ELECTRICITY_BILL" -> Icons.Default.Bolt
     "WATER_BILL" -> Icons.Default.WaterDrop
     "REFUND" -> Icons.Default.Replay
+    "CASHBACK" -> Icons.Default.CardGiftcard
     else -> Icons.Default.VerifiedUser
 }
 
@@ -345,6 +347,32 @@ fun TransactionReceiptSheet(
             }
             if (txn.note.isNotBlank()) {
                 ReceiptDetailRow("Remarks", txn.note)
+            }
+
+            val isEligiblePayment = txn.status == "SUCCESS" && txn.type in listOf(
+                "SEND_MONEY", "MOBILE_RECHARGE", "DTH_RECHARGE", "ELECTRICITY_BILL", "WATER_BILL"
+            )
+            if (isEligiblePayment) {
+                val cbAmount = (txn.amountPaise * 25L) / 100L
+                Surface(
+                    color = sujoy.successContainer,
+                    shape = RoundedCornerShape(14.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier.padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(Icons.Default.CardGiftcard, contentDescription = null, tint = sujoy.success, modifier = Modifier.size(20.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "25% Cashback Reward: +${Formatters.formatInr(cbAmount)} credited to your wallet!",
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color = sujoy.success
+                        )
+                    }
+                }
             }
 
             if (onSubmitDispute != null) {
